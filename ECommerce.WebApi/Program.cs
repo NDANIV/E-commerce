@@ -1,4 +1,8 @@
+using ECommerce.Application.Common;
+using MediatR;
+
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 
@@ -6,6 +10,10 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// MediatR: escanea el assembly de Application
+builder.Services.AddMediatR(typeof(ApplicationAssemblyMarker).Assembly);
+
 
 var app = builder.Build();
 
