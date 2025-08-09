@@ -4,27 +4,46 @@ using MediatR;
 namespace ECommerce.Application.Common.Behaviors;
 
 /// <summary>
-/// Pipeline de MediatR que ejecuta validaciones de FluentValidation
-/// antes de invocar el Handler correspondiente.
+/// Pipeline de MediatR que ejecuta las validaciones de FluentValidation
+/// para un <typeparamref name="TRequest"/> antes de invocar su Handler.
 /// </summary>
-/// <typeparam name="TRequest">Tipo de mensaje de entrada (Command/Query).</typeparam>
-/// <typeparam name="TResponse">Tipo de respuesta del Handler.</typeparam>
+/// <typeparam name="TRequest">
+/// Tipo de solicitud que debe implementar <see cref="IRequest{TResponse}"/>.
+/// </typeparam>
+/// <typeparam name="TResponse">
+/// Tipo de respuesta devuelta por el Handler de la solicitud.
+/// </typeparam>
+/// <remarks>
+/// Esta implementación asume la firma de MediatR clásica (v10/11) donde
+/// <c>IPipelineBehavior&lt;TRequest,TResponse&gt;</c> opera con <c>IRequest&lt;TResponse&gt;</c>.
+/// Si migras a MediatR v12 y usas otra firma, ajusta la restricción.
+/// </remarks>
 public sealed class ValidationBehavior<TRequest, TResponse> 
-    : IPipelineBehavior<TRequest, TResponse> where TRequest : notnull
+    : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : IRequest<TResponse>
 {
     private readonly IEnumerable<IValidator<TRequest>> _validators;
 
     /// <summary>
-    /// Crea el behavior con los validadores inyectados para el tipo TRequest.
+    /// Crea el behavior con los validadores disponibles para <typeparamref name="TRequest"/>.
     /// </summary>
-    /// <param name="validators">Colección de validadores encontrados por DI.</param>
+    /// <param name="validators">Colección de validadores registrados en DI.</param>
     public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
         => _validators = validators;
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Ejecuta las validaciones y, si son exitosas, continúa con el siguiente paso del pipeline.
+    /// </summary>
+    /// <param name="request">Solicitud a validar.</param>
+    /// <param name="next">Delegado para invocar el siguiente componente del pipeline/handler.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>La respuesta de tipo <typeparamref name="TResponse"/>.</returns>
+    /// <exception cref="ValidationException">
+    /// Se lanza cuando una o más reglas de validación fallan.
+    /// </exception>
     public async Task<TResponse> Handle(
-        TRequest request, 
-        RequestHandlerDelegate<TResponse> next, 
+        TRequest request,
+        RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
         if (_validators.Any())
