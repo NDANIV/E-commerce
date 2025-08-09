@@ -1,28 +1,62 @@
 using ECommerce.Application.Common;
 using MediatR;
+using System.Text;
+using ECommerce.Application;
+using ECommerce.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 // Add services to the container.
-
+// Controllers + Swagger
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // MediatR: escanea el assembly de Application
 builder.Services.AddMediatR(typeof(ApplicationAssemblyMarker).Assembly);
 
+// Application (MediatR, Validators, Pipeline)
+builder.Services.AddApplication();
+
+// Infrastructure (DbContext, Identity, JWT service)
+builder.Services.AddInfrastructure(builder.Configuration);
+
+// ====== JWT Authentication ======
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Config Jwt:Key es obligatoria.");
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "ECommerce";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "ECommerce";
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opt =>
+    {
+        opt.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ClockSkew = TimeSpan.Zero // tokens expiran exactamente cuando deben
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// HTTPS + AuthZ
 
 app.UseHttpsRedirection();
 
