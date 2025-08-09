@@ -13,7 +13,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Controllers + Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    // Incluir comentarios XML
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+        options.IncludeXmlComments(xmlPath);
+
+    // (Agregaremos aquí el esquema JWT)
+});
 
 // MediatR: escanea el assembly de Application
 builder.Services.AddMediatR(typeof(ApplicationAssemblyMarker).Assembly);

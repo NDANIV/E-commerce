@@ -16,4 +16,8 @@
     <ProjectReference Include="..\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj" />
   </ItemGroup>
 
+   <!-- Habilita la generación del XML de documentación -->
+  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  <NoWarn>1591</NoWarn> <!-- Opcional: no advertir por miembros sin doc -->
+
 </Project>
