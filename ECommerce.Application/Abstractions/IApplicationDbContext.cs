@@ -30,6 +30,18 @@ public interface IApplicationDbContext
     DbSet<OrderItem> OrderItems { get; }
 
     /// <summary>
+    /// Conjunto de carritos. Implementado por la capa de infraestructura.
+    /// </summary>
+    DbSet<Cart> Carts { get; }
+
+    /// <summary>
+    /// Conjunto de ítems de carrito. Implementado por la capa de infraestructura.
+    /// </summary>
+    DbSet<CartItem> CartItems { get; }
+
+    /// <summary>
+    /// Conjunto de ítems de carrito. Implementado por la capa de infraestructura.
+    /// <summary>
     /// Persiste los cambios pendientes en la unidad de trabajo actual.
     /// </summary>
     /// <param name="ct">Token de cancelación para operaciones asíncronas.</param>
