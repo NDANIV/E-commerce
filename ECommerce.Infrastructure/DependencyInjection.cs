@@ -23,6 +23,7 @@ public static class DependencyInjection
     /// <returns>El contenedor para encadenar llamadas.</returns>
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        
         var connectionString = configuration.GetConnectionString("Default")
             ?? configuration["ConnectionStrings:Default"]
             ?? throw new InvalidOperationException("ConnectionStrings:Default no configurado.");
@@ -56,8 +57,13 @@ public static class DependencyInjection
         // Exponer IApplicationDbContext como AppDbContext (puerto -> implementación)
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<AppDbContext>());
 
+        // Transaction service
+        services.AddScoped<ITransactionService, TransactionService>();
+        
         // JWT service
         services.AddScoped<IJwtTokenService, JwtTokenService>();
+
+
 
         return services;
     }

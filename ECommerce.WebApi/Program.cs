@@ -47,14 +47,18 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// MediatR: escanea el assembly de Application
-builder.Services.AddMediatR(typeof(ApplicationAssemblyMarker).Assembly);
 
 // Application (MediatR, Validators, Pipeline)
 builder.Services.AddApplication();
 
 // Infrastructure (DbContext, Identity, JWT service)
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// Debug
+//builder.Services.AddScoped<
+//    ECommerce.Application.Abstractions.ITransactionService,
+//    ECommerce.Infrastructure.Persistence.TransactionService>();
+
 
 // ====== JWT Authentication ======
 var jwtKey = builder.Configuration["Jwt:Key"]
@@ -78,6 +82,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+
 
 var app = builder.Build();
 

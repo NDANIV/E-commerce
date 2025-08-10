@@ -1,6 +1,13 @@
 using ECommerce.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
+// Alias para evitar colisión con el namespace ECommerce.Application.Cart
+using ProductEntity   = ECommerce.Domain.Entities.Product;
+using OrderEntity     = ECommerce.Domain.Entities.Order;
+using OrderItemEntity = ECommerce.Domain.Entities.OrderItem;
+using CartEntity      = ECommerce.Domain.Entities.Cart;
+using CartItemEntity  = ECommerce.Domain.Entities.CartItem;
+
 namespace ECommerce.Application.Abstractions;
 
 /// <summary>
@@ -32,12 +39,12 @@ public interface IApplicationDbContext
     /// <summary>
     /// Conjunto de carritos. Implementado por la capa de infraestructura.
     /// </summary>
-    DbSet<Cart> Carts { get; }
+    DbSet<CartEntity> Carts { get; }
 
     /// <summary>
     /// Conjunto de ítems de carrito. Implementado por la capa de infraestructura.
     /// </summary>
-    DbSet<CartItem> CartItems { get; }
+    DbSet<CartItemEntity> CartItems { get; }
 
     /// <summary>
     /// Conjunto de ítems de carrito. Implementado por la capa de infraestructura.

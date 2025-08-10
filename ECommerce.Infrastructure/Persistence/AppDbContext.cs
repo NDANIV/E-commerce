@@ -34,6 +34,12 @@ public class AppDbContext
     /// <inheritdoc/>
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
+    /// <inheritdoc/>
+    public DbSet<Cart>      Carts      => Set<Cart>();
+
+    /// <inheritdoc/>
+    public DbSet<CartItem>  CartItems  => Set<CartItem>();
+
     /// <summary>
     /// Configuración de mapeos y restricciones de modelos de dominio e Identity.
     /// </summary>
