@@ -113,6 +113,34 @@ public class AppDbContext
              .OnDelete(DeleteBehavior.Cascade);
         });
 
+        // ===== CART =====
+    modelBuilder.Entity<Cart>(b =>
+    {
+        b.ToTable("Carts");
+        b.HasKey(c => c.Id);
+        b.Property(c => c.UserId).IsRequired();
+        b.Property(c => c.UpdatedAt).IsRequired();
+
+        b.HasMany(c => c.Items)
+         .WithOne()
+         .HasForeignKey(i => i.CartId)
+         .OnDelete(DeleteBehavior.Cascade);
+
+        b.HasIndex(c => c.UserId).IsUnique(); // un carrito por usuario
+    });
+
+    // ===== CART ITEM =====
+    modelBuilder.Entity<CartItem>(b =>
+    {
+        b.ToTable("CartItems");
+        b.HasKey(ci => ci.Id);
+
+        b.Property(ci => ci.Quantity).IsRequired();
+        b.Property(ci => ci.UnitPrice).HasPrecision(18, 2);
+
+        b.HasIndex(ci => new { ci.CartId, ci.ProductId }).IsUnique();
+    });
+
         // Índices sugeridos (consultas más rápidas)
         modelBuilder.Entity<Product>().HasIndex(p => new { p.IsActive, p.CategoryId });
         modelBuilder.Entity<Product>().HasIndex(p => p.Name);
