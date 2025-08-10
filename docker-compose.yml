@@ -30,7 +30,7 @@ services:
       # Connection string: OJO hostname = db (nombre del servicio)
       ConnectionStrings__Default: "server=db;port=3306;database=ecommerce;user=ecom_user;password=secret123;TreatTinyAsBoolean=true;SslMode=None;AllowPublicKeyRetrieval=True"
       # JWT
-      Jwt__Key: "SuperSecretJwtKey_change_me"
+      Jwt__Key: "b7e1c1a5b65fa2b64c7e97f4c3b1d8e2a4f6c8d0e2f4a6b8c0d2e4f6a8b0c2d4"
       Jwt__Issuer: "ECommerce"
       Jwt__Audience: "ECommerce"
       Jwt__ExpiresHours: "2"
