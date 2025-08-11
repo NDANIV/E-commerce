@@ -39,6 +39,7 @@ public sealed class CheckoutHandler : IRequestHandler<CheckoutCommand, Guid>
             throw new InvalidOperationException("El carrito está vacío.");
 
         var orderId = Guid.NewGuid();
+        decimal total = 0m;
 
         await _tx.ExecuteInTransactionAsync(async _ =>
         {
@@ -59,6 +60,17 @@ public sealed class CheckoutHandler : IRequestHandler<CheckoutCommand, Guid>
                 // Descuento de stock
                 p.Stock -= it.Quantity;
             }
+
+            var items = cart.Items.Select(ci => new OrderItem
+            {
+                Id = Guid.NewGuid(),
+                OrderId = orderId,
+                ProductId = ci.ProductId,
+                Quantity = ci.Quantity,
+                UnitPrice = products[ci.ProductId].Price
+            }).ToList();
+
+            total = items.Sum(i => i.UnitPrice * i.Quantity);
 
             // Crear el pedido con precios *congelados al momento*
             var order = new Order

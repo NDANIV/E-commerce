@@ -1,4 +1,6 @@
+
 namespace ECommerce.Application.Abstractions;
+
 
 /// <summary>
 /// Abstracción para envío de mensajes por correo electrónico.
