@@ -22,7 +22,7 @@ public sealed class UpdateCartItemQtyHandlerTests : IClassFixture<SqliteAppDbCon
         var (_, productId) = await SeedHelper.SeedProductAsync(ctx, price: 15m);
         var userId = Guid.NewGuid();
 
-        var cart = new Cart { Id = Guid.NewGuid(), UserId = userId };
+        var cart = new ECommerce.Domain.Entities.Cart { Id = Guid.NewGuid(), UserId = userId };
         cart.Items.Add(new CartItem { Id = Guid.NewGuid(), ProductId = productId, Quantity = 1, UnitPrice = 10m });
         ctx.Carts.Add(cart); await ctx.SaveChangesAsync();
 
