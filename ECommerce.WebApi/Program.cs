@@ -87,8 +87,9 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 // ===== Migrar y Seed (solo DEV / para simplificar arranque) =====
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment("Testing"))
 {
+    using var scope = app.Services.CreateScope();
     await DataSeeder.SeedAsync(scope.ServiceProvider);
 }
 
@@ -108,3 +109,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+/// <summary>
+/// Marcador parcial para permitir a WebApplicationFactory acceder al entry point en pruebas.
+/// </summary>
+public partial class Program { }
