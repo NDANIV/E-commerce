@@ -1,11 +1,11 @@
-# 🛒 E-commerce Backend — .NET 8 + Clean Architecture
+# E-commerce Backend — .NET 8 + Clean Architecture
 
 Backend para un sistema de e-commerce desarrollado en **.NET 8**, siguiendo **Clean Architecture** y el patrón **CQRS con MediatR**.  
 Incluye autenticación JWT, gestión de usuarios y roles, catálogo de productos, carrito de compras, checkout, pedidos y sistema de notificaciones.
 
 ---
 
-## 🚀 Tecnologías principales
+##  Tecnologías principales
 - **.NET 8**
 - **Clean Architecture**
 - **CQRS + MediatR**
@@ -13,7 +13,7 @@ Incluye autenticación JWT, gestión de usuarios y roles, catálogo de productos
 - **JWT Authentication**
 - **Docker y Docker Compose**
 - **xUnit**, **FluentAssertions** (pruebas)
-- **Swagger/OpenAPI**
+- **Swagger**
 
 ---
 
@@ -26,6 +26,7 @@ ECommerce.Infrastructure/  # Implementaciones: EF Core, JWT, email, etc.
 ECommerce.WebApi/          # API REST: controllers, configuración, middleware
 ECommerce.UnitTests/       # Pruebas unitarias
 ECommerce.IntegrationTests/# Pruebas de integración
+```
 
 ---
 
@@ -63,11 +64,21 @@ flowchart TB
     Entities --> Events
  
 ```
-## Requisitos
-- Docker Desktop (Windows/Mac) o Docker + Compose (Linux)
+## Requisitos Previos 
+- **Docker Desktop (Windows/Mac) o Docker + Compose (Linux)**
+- **GIT**
 
-## Arranque rápido
-- Agrega .env (configura tu JWT y credenciales) 
+## Instalacion y Ejecucion
+
+1-Clonar el repositorio
+```bash
+git clone https://github.com/NDANIV/E-commerce.git
+cd <tu-repo>
+```
+2-Configurar variables de entorno
+- **Agrega .env (configura tu JWT y credenciales)**
+
+3- **Ejecutar Docker**
 ```bash        
 docker compose build
 docker compose up -d
@@ -75,22 +86,52 @@ docker compose up -d
 # http://localhost:8080/swagger
 ```
 
-Cuentas de prueba 
+##Cuentas de prueba 
     Admin: admin@shop.local / Admin123!
 
-Rutas principales
-    POST /api/auth/login
+## Principales endpoints
+**Autenticación**
+-POST /api/auth/register — registro de usuario
 
-    GET /api/products
+-POST /api/auth/login — inicio de sesión
 
-    POST /api/cart/items, GET /api/cart
+**Catálogo**
+-GET /api/products — listar productos
 
-    POST /api/orders/checkout, GET /api/orders/my
+-GET /api/products/{id} — detalle de producto
 
-Problemas comunes (y solución express)
+-POST /api/products (solo Admin) — crear producto
 
-    IDX10720 (HS256 key corta): cambia JWT_KEY por 64 chars (≥32 bytes).
+**Carrito**
+-POST /api/cart/items — agregar producto al carrito
 
-    Puerto 8080 ocupado: cambia API_PORT en .env (p. ej. 8081) y repite docker compose up -d.
+-PUT /api/cart/items/{productId} — actualizar cantidad
 
-    MySQL tarda en levantar: el depends_on.healthcheck ya espera; si api falla la 1ª vez, docker compose up -d --force-recreate.
+-GET /api/cart — ver carrito
+
+**Checkout / Pedidos**
+-POST /api/orders/checkout — procesar compra
+
+-GET /api/orders/my — pedidos del usuario autenticado
+
+##Pruebas
+
+Pruebas unitarias e integración usando xUnit y FluentAssertions.
+
+**Unitarias:** verifican handlers, validadores y lógica de dominio.
+
+**Integración:** simulan flujo completo (auth, carrito, checkout) con SQLite in-memory y autenticación fake.
+
+Para ejecutarlas:
+
+```bash
+dotnet test
+```
+
+## Problemas comunes 
+
+    -IDX10720 (HS256 key corta): cambia JWT_KEY por 64 chars (≥32 bytes).
+
+    -Puerto 8080 ocupado: cambia API_PORT en .env (p. ej. 8081) y repite docker compose up -d.
+
+    -MySQL tarda en levantar: el depends_on.healthcheck ya espera; si api falla  la 1ª vez, docker compose up -d --force-recreate.
