@@ -1,0 +1,42 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: ecommerce-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${MYSQL_PASSWORD}"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  api:
+    build:
+      context: .
+      dockerfile: ./ECommerce.WebApi/Dockerfile
+    container_name: ecommerce-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Connection string: OJO hostname = db (nombre del servicio)
+      ConnectionStrings__Default: "server=db;port=3306;database=${MYSQL_DATABASE};user=${MYSQL_USER};password=${MYSQL_PASSWORD};TreatTinyAsBoolean=true;SslMode=None;AllowPublicKeyRetrieval=True"
+      Jwt__Key: "${JWT_KEY}"
+      Jwt__Issuer: "${JWT_ISSUER}"
+      Jwt__Audience: "${JWT_AUDIENCE}"
+      Jwt__ExpiresHours: "${JWT_EXPIRES_HOURS}"
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+    ports:
+      - "${API_PORT}:8080"
+    restart: unless-stopped
+
+volumes:
+  dbdata:
