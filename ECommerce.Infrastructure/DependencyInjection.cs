@@ -63,6 +63,9 @@ public static class DependencyInjection
         // JWT service
         services.AddScoped<IJwtTokenService, JwtTokenService>();
 
+        // Email sender
+        services.AddScoped<IEmailSender, EmailSender>();
+
 
 
         return services;

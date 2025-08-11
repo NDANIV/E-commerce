@@ -1,5 +1,6 @@
 using ECommerce.Application.Abstractions;
 using ECommerce.Domain.Entities;
+using ECommerce.Domain.Events;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -21,10 +22,11 @@ public sealed class CheckoutHandler : IRequestHandler<CheckoutCommand, Guid>
 {
     private readonly IApplicationDbContext _db;
     private readonly ITransactionService _tx;
+    private readonly IPublisher _publisher;
 
-    public CheckoutHandler(IApplicationDbContext db, ITransactionService tx)
+    public CheckoutHandler(IApplicationDbContext db, ITransactionService tx, IPublisher publisher)
     {
-        _db = db; _tx = tx;
+        _db = db; _tx = tx; _publisher = publisher;
     }
 
     public async Task<Guid> Handle(CheckoutCommand request, CancellationToken ct)
@@ -83,6 +85,8 @@ public sealed class CheckoutHandler : IRequestHandler<CheckoutCommand, Guid>
 
             await _db.SaveChangesAsync(ct);
         }, ct);
+
+        await _publisher.Publish(new OrderPlacedEvent(orderId, request.UserId, total), ct);
 
         return orderId;
     }
