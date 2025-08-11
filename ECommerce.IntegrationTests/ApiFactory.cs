@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication;
 
 namespace ECommerce.IntegrationTests;
 
@@ -36,6 +37,13 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             db.Database.EnsureCreated();
+            
+            // Autenticación
+            services.AddAuthentication(o =>
+            {
+                o.DefaultAuthenticateScheme = TestAuthHandler.Scheme;
+                o.DefaultChallengeScheme    = TestAuthHandler.Scheme;
+            }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.Scheme, _ => { });
         });
     }
 

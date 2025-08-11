@@ -20,20 +20,13 @@ public sealed class CartCheckoutFlowTests : IClassFixture<ApiFactory>
     [Fact]
     public async Task Flujo_completo_de_compra()
     {
-        var client = _factory.CreateClient();
+        var client = _factory.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("http://localhost")
+        });
 
-        // 1) Registro y login (Customer)
-        var email = $"user{Guid.NewGuid():N}@test.local";
-        var password = "Secret123!";
-        var reg = await client.PostAsJsonAsync("/api/auth/register", new { email, password });
-        reg.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var login = await client.PostAsJsonAsync("/api/auth/login", new { email, password });
-        login.EnsureSuccessStatusCode();
-        var token = (await login.Content.ReadFromJsonAsync<LoginResponse>())!.Token;
-        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-        // 2) Seed de producto en la BD (directo por contexto, para no requerir rol Admin)
+        Guid productId;
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -42,22 +35,23 @@ public sealed class CartCheckoutFlowTests : IClassFixture<ApiFactory>
             db.Categories.Add(cat);
             db.Products.Add(prod);
             await db.SaveChangesAsync();
-
-            // 3) Agregar al carrito
-            var add = await client.PostAsJsonAsync("/api/cart/items", new { productId = prod.Id, quantity = 2 });
-            add.EnsureSuccessStatusCode();
-
-            // 4) Checkout
-            var co = await client.PostAsync("/api/orders/checkout", null);
-            co.EnsureSuccessStatusCode();
-
-            // 5) Mis pedidos
-            var my = await client.GetAsync("/api/orders/my");
-            my.EnsureSuccessStatusCode();
-            var orders = await my.Content.ReadFromJsonAsync<List<ECommerce.Domain.Entities.Order>>();
-            orders!.Should().NotBeNull().And.HaveCount(1);
-            orders![0].Items.Should().ContainSingle(i => i.ProductId == prod.Id && i.Quantity == 2);
+            productId = prod.Id;
         }
+
+        // 2) Agregar al carrito
+        var add = await client.PostAsJsonAsync("/api/cart/items", new { productId, quantity = 2 });
+        add.EnsureSuccessStatusCode();
+
+        // 3) Checkout
+        var co = await client.PostAsync("/api/orders/checkout", null);
+        co.EnsureSuccessStatusCode();
+
+        // 4) Mis pedidos
+        var my = await client.GetAsync("/api/orders/my");
+        my.EnsureSuccessStatusCode();
+        var orders = await my.Content.ReadFromJsonAsync<List<ECommerce.Domain.Entities.Order>>();
+        orders!.Should().NotBeNull().And.HaveCount(1);
+        orders![0].Items.Should().ContainSingle(i => i.ProductId == productId && i.Quantity == 2);
     }
 }
 
